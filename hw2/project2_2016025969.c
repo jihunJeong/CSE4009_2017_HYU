@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <pthread.h>
 #include <unistd.h>
-
+#include <time.h>
 
 #define NUM_THREAD 100
 
@@ -14,7 +14,7 @@ pthread_cond_t  condB = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int arr[40];
-int max_num = 6;
+int max_num;
 int min_num = 1;
 int input_num = 1;
 
@@ -26,11 +26,14 @@ void *threadA() {
 			pthread_cond_wait(&condA, &mutex);
 		pthread_mutex_unlock(&mutex);
 
-		for (int i = 1; i <= max_num; i++) {
-			arr[i - 1] = input_num;
+		srand(time(NULL));
+		max_num = rand() % 40;
+
+		for (int i = 0; i <= max_num; i++) {
+			arr[i] = input_num;
 			input_num++;
 			
-			for (int k = 0; k < i; k++) {
+			for (int k = 0; k <= i; k++) {
 				printf("%d,", arr[k]);
 			}
 
@@ -54,21 +57,12 @@ void *threadB() {
 		pthread_mutex_unlock(&mutex);
 
 		int i = 0;
-		while(i < max_num) {
+		while(i <= max_num) {
 			printf("popped %d\n", arr[i]);
 			i++;
 		}
-
-		if (max_num == 6) {
-			min_num = 7;
-			max_num = 17;
-		} else if (max_num == 17) {
-			min_num = 24;
-			max_num = 40;
-		} else {
-			min_num += 40;
-		}
-
+		
+		sleep(3);
 		pthread_mutex_lock(&mutex);
 		state = STATE_A;
 		pthread_cond_signal(&condA);
